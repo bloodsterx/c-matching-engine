@@ -8,6 +8,15 @@ typedef enum {
     BUY, SELL
 } Side;
 
+/*
+args:
+    - long id;
+    - char *user_name;
+    - int price;
+    - int volume;
+    - Side side;
+    - time_t timestamp;
+*/
 typedef struct {
     long id;
     char *user_name;
@@ -17,13 +26,24 @@ typedef struct {
     time_t timestamp;
 } Order;
 
+/*
+args:
+    - Order *order;
+    - struct OrderNode *prev;
+    - struct OrderNode *next;
+*/
 typedef struct OrderNode {
     Order *order;
     struct OrderNode *prev;
     struct OrderNode *next;
 } OrderNode;
 
-
+/*
+args:
+    - OrderNode* head; dummy pointer always pointing to the head if list not empty, else points to tail
+    - OrderNode* tail; likewise for head
+    - size_t size;
+*/
 typedef struct {
     OrderNode *head;
     OrderNode *tail;
@@ -44,11 +64,16 @@ OrderList* init_orderlist();
 
 OrderNode* init_ordernode();
 
-void destroy_orderlist(OrderList* order_list);
-
 int add_order(OrderList *order_list, Order *order);
 
 int remove_order(OrderNode* order_node);
+
+void destroy_orderlist(OrderList* order_list);
+
+void destroy_ordernode(OrderNode* order_node);
+
+void destroy_order(Order* order);
+
 
 
 
@@ -58,8 +83,4 @@ remove (O(1) lookup from hashmap to get node)
 
 
 */
-
-
-
-
 #endif

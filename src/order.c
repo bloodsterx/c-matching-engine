@@ -1,5 +1,6 @@
 #include "../lib/order.h"
 
+#include <locale>
 #include <stdio.h>
 
 Order* create_order(
@@ -51,30 +52,39 @@ OrderList* init_orderlist() {
     return order_list;
 }
 
+
+/*
+    Adds order to the order DLL at a given price
+    Caller will handle adding this order to the global hashmap
+
+*/
 int add_order(OrderList *order_list, Order *order) {
     if (!order) return -1;
     if (!order_list) {
         printf("err: order_list is NULL\n");
         return -1;
     }
-    OrderNode* order_node = init_ordernode(order);
+    OrderNode* new_node = init_ordernode();
+    if (!new_node) return -1;
 
-    if (!order_node) return -1;
-    if (!order_list->head && !order_list->tail) {
-        // order list initialised but no orders (e.g. all liquidity at price level previously depleted)
-        // decision point: keep in memory if a price level has all volume consumed? Or delete list and create new
-        order_list->head = order_node;
-        order_list->tail = order_list->head;
-    } 
-    else if (order_list->head && order_list->tail) {
-        // expected (head <-> tail)
-        OrderNode* prev = order_list->head->prev;
-        if (!prev)
-        prev->next = order_node;
-        order_node->prev = prev
-    }
+    new_node->order = order;
+
+    // tail <-> head (size = 0)
+    // tail <-> new_node <-> head (size = 1)
+    OrderNode* old_head = order_list->head->prev;
+
+    old_head->next = new_node;
+    new_node->prev = old_head;
+
+    order_list->head->prev = new_node;
+    new_node->next = order_list->head;
+    
+    return 0;
 }
 
+// int remove_order(OrderNode *order_node) {
+    
+// }
 
 
 void destroy_orderlist(OrderList* order_list) {
