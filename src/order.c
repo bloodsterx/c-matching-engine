@@ -90,6 +90,30 @@ int add_order(OrderList *order_list, Order *order) {
     return 0;
 }
 
+/*
+    Handles order removal operation in the order's order_list. 
+    Responsible for decrementing and changing order_list state.
+    **NOT RESPONSIBLE** for:
+    - changing hashmap state (caller)
+    - changing heap state
+
+*/
+int remove_order(OrderList *order_list, OrderNode *order_node) {
+    if (!order_list || !order_node) return -1;
+
+    if (!order_node->order) return -1;
+
+    Order* order = order_node->order;
+
+    destroy_order(order);
+    order_node->order = NULL;
+    
+    int res = destroy_ordernode(order_node);
+    if (res != 0) return res; // extremely unlikely
+
+    order_list->size--;
+    return 0;
+}
 
 /*
     frees the order_node. Not responsible for freeing the internal Order struct.

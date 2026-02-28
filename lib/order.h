@@ -40,11 +40,13 @@ typedef struct OrderNode {
 
 /*
 args:
+    - int price; price level this list represents
     - OrderNode* head; dummy pointer always pointing to the head if list not empty, else points to tail
     - OrderNode* tail; likewise for head
     - size_t size;
 */
 typedef struct {
+    int price;
     OrderNode *head;
     OrderNode *tail;
     size_t size;
@@ -65,6 +67,8 @@ OrderList* init_orderlist();
 OrderNode* init_ordernode();
 
 int add_order(OrderList *order_list, Order *order);
+
+int remove_order(OrderList *order_list, OrderNode *order_node);
 
 void destroy_orderlist(OrderList* order_list);
 
