@@ -1,6 +1,5 @@
 #include "../lib/order.h"
 
-#include <locale>
 #include <stdio.h>
 
 Order* create_order(
@@ -38,10 +37,17 @@ OrderList* init_orderlist() {
     if (!order_list) return NULL;
 
     OrderNode* tail_ptr = init_ordernode();
-    if (!tail_ptr) return NULL;
+    if (!tail_ptr) {
+        free(order_list);
+        return NULL;
+    }
 
     OrderNode* head_ptr = init_ordernode();
-    if (!head_ptr) return NULL;
+    if (!head_ptr) {
+        free(tail_ptr);
+        free(order_list);
+        return NULL;
+    }
 
     head_ptr->prev = tail_ptr;
     tail_ptr->next = head_ptr;
@@ -78,21 +84,51 @@ int add_order(OrderList *order_list, Order *order) {
 
     order_list->head->prev = new_node;
     new_node->next = order_list->head;
+
+    order_list->size++;
     
     return 0;
 }
 
-// int remove_order(OrderNode *order_node) {
-    
-// }
+
+/*
+    frees the order_node. Not responsible for freeing the internal Order struct.
+    If order exists, will return error (-1)
+
+    E.g. order of ops:
+    1. cancel order called -> pop ordernode from orderid hashmap 
+    2. get price and retrieve orderlist from price hashmap
+    3. Remove order in ordernode
+    4. Remove ordernode from orderList and decrement size
+    then remove ordernode and reattach links
+
+*/
+int destroy_ordernode(OrderNode *order_node) {
+    if (!order_node) return -1;
+
+    if (order_node->order) {
+        printf("err: Attempted to remove order node while order struct still exists\n");
+        return -1;
+    }
+
+    order_node->prev->next = order_node->next;
+    order_node->next->prev = order_node->prev;
+
+    free(order_node);
+    return 0;
+}
 
 
 void destroy_orderlist(OrderList* order_list) {
     if (!order_list) return;
-    if (order_list->head || order_list->tail) {
-        printf("err: tried to remove order_list with at least one active order\n");
+    if (order_list->size > 0) {
+        printf("err: tried to remove order_list with %zu active order(s)\n", order_list->size);
         return;
     }
+
+    // free the default pointers
+    free(order_list->head);
+    free(order_list->tail);
     free(order_list);
 }
 
@@ -102,18 +138,3 @@ void destroy_order(Order* order) {
     free(order);
 }
 
-// /*
-//  * Frees the order node ONLY. Caller is responsible freeing/reattaching any links. 
-//  */
-// void destroy_ordernode(OrderNode* order_node) {
-//     if (!order_node) return;
-//     if (order_node->order) {
-//         printf("err: tried to free order node with an active order\n");
-//         return;
-//     }
-//     if (order_node->next || order_node->prev) {
-//         printf("err: tried to free order node with at least one attached prev/next links\n");
-//         return;
-//     }
-//     free(order_node);
-// }

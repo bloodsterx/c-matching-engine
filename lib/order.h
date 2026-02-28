@@ -66,11 +66,9 @@ OrderNode* init_ordernode();
 
 int add_order(OrderList *order_list, Order *order);
 
-int remove_order(OrderNode* order_node);
-
 void destroy_orderlist(OrderList* order_list);
 
-void destroy_ordernode(OrderNode* order_node);
+int destroy_ordernode(OrderNode* order_node);
 
 void destroy_order(Order* order);
 
