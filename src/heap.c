@@ -87,7 +87,7 @@ static int resize_heap(Heap* h) {
 
     OrderList** tmp = (OrderList**) realloc(h->data, sizeof(OrderList*)*h->capacity*2);
     if (!tmp) return -1;
-    
+
     h->capacity *= 2; // double in size - standard resize op
     h->data = tmp;
     return 0;
@@ -107,4 +107,10 @@ int push(Heap *h, OrderList *order_list) {
     if (heapify_up(h) == -1) return -1;
     
     return 0;
+}
+
+OrderList* peek(Heap* h) {
+    if (!h) return NULL;
+    if (h->size == 0) return NULL;
+    return h->data[0];
 }
