@@ -77,13 +77,13 @@ int add_order(OrderList *order_list, Order *order) {
 
     // tail <-> head (size = 0)
     // tail <-> new_node <-> head (size = 1)
-    OrderNode* old_head = order_list->head->prev;
+    OrderNode* old_tail = order_list->tail->next;
 
-    old_head->next = new_node;
-    new_node->prev = old_head;
+    old_tail->prev = new_node;
+    new_node->next = old_tail;
 
-    order_list->head->prev = new_node;
-    new_node->next = order_list->head;
+    order_list->tail->next = new_node;
+    new_node->prev = order_list->tail;
 
     order_list->size++;
     
@@ -107,6 +107,9 @@ int remove_order(OrderList *order_list, OrderNode *order_node) {
 
     destroy_order(order);
     order_node->order = NULL;
+
+    order_node->prev->next = order_node->next;
+    order_node->next->prev = order_node->prev;
     
     int res = destroy_ordernode(order_node);
     if (res != 0) return res; // extremely unlikely
@@ -134,9 +137,6 @@ int destroy_ordernode(OrderNode *order_node) {
         printf("err: Attempted to remove order node while order struct still exists\n");
         return -1;
     }
-
-    order_node->prev->next = order_node->next;
-    order_node->next->prev = order_node->prev;
 
     free(order_node);
     return 0;
