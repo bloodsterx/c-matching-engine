@@ -156,6 +156,20 @@ void destroy_orderlist(OrderList* order_list) {
     free(order_list);
 }
 
+void print_orderlist(const OrderList *order_list) {
+    if (!order_list) {
+        printf("NULL\n");
+        return;
+    }
+    printf("TAIL");
+    OrderNode *cur = order_list->tail->next;
+    while (cur != order_list->head) {
+        printf(" <-> [id=%ld vol=%d]", cur->order->id, cur->order->volume);
+        cur = cur->next;
+    }
+    printf(" <-> HEAD  (size=%zu)\n", order_list->size);
+}
+
 void destroy_order(Order* order) {
     if (!order) return;
     if (order->user_name) free(order->user_name);
