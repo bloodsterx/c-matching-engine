@@ -37,6 +37,7 @@ static int swap(OrderList** i, OrderList** j) {
 }
 
 int heapify_up(Heap* h) {
+    if (!h) return -1;
     int i = h->size - 1;
 
     while (i > 0) {
@@ -54,6 +55,7 @@ int heapify_up(Heap* h) {
 }
 
 int heapify_down(Heap* h) {
+    if (!h) return -1;
     int i = 0; // root of any given subtree
     
     while (i < h->size) { // at each iteration (subtree), compare root 'i' with its children
@@ -77,6 +79,32 @@ int heapify_down(Heap* h) {
     return 0;
 }
 
+/*
+    Resizes heap when size == capacity. Caller must ensure size == capacity before resize_heap call
+*/
+static int resize_heap(Heap* h) {
+    if (!h) return -1;
+
+    OrderList** tmp = (OrderList**) realloc(h->data, sizeof(OrderList*)*h->capacity*2);
+    if (!tmp) return -1;
+    
+    h->capacity *= 2; // double in size - standard resize op
+    h->data = tmp;
+    return 0;
+}
+
+
 int push(Heap *h, OrderList *order_list) {
+    if (!h || !order_list) return -1;
+    
+    if (h->size == h->capacity) {
+        if (resize_heap(h) == -1) return -1;
+    }
+
+    h->data[h->size] = order_list;
+    h->size++;
+
+    if (heapify_up(h) == -1) return -1;
+    
     return 0;
 }

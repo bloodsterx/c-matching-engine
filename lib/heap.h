@@ -17,8 +17,6 @@ typedef struct {
 
 Heap* init_heap(int capacity, HeapType type);
 
-Heap* resize_heap(Heap* h);
-
 int heapify_up(Heap* h);
 
 int heapify_down(Heap* h);
