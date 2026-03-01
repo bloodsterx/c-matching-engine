@@ -48,11 +48,13 @@ static int check_backward(OrderList *ol, Order **expected, int n) {
     return 0;
 }
 
-/* Null the order on a node, free the order, destroy the node, and decrement
-   the list size. Mirrors the expected caller workflow. */
+/* Null the order, relink neighbors, free the node, and decrement size.
+   Mirrors remove_order's workflow without going through the public API. */
 static int remove_node(OrderList *ol, OrderNode *node, Order *order) {
     node->order = NULL;
     destroy_order(order);
+    node->prev->next = node->next;
+    node->next->prev = node->prev;
     if (destroy_ordernode(node) != 0) return -1;
     ol->size--;
     return 0;
@@ -79,8 +81,8 @@ static int test_add_three() {
         return -1;
     }
 
-    /* Insertion order: o1 is closest to tail, o3 is closest to head. */
-    Order *expected[] = {o1, o2, o3};
+    /* o3 is closest to tail (newest), o1 is closest to head (oldest). */
+    Order *expected[] = {o3, o2, o1};
     if (check_forward(ol,  expected, 3) != 0) return -1;
     if (check_backward(ol, expected, 3) != 0) return -1;
 
@@ -88,14 +90,14 @@ static int test_add_three() {
     OrderNode *n1 = ol->tail->next;
     OrderNode *n2 = n1->next;
     OrderNode *n3 = n2->next;
-    if (remove_node(ol, n1, o1) != 0) return -1;
+    if (remove_node(ol, n1, o3) != 0) return -1;
     if (remove_node(ol, n2, o2) != 0) return -1;
-    if (remove_node(ol, n3, o3) != 0) return -1;
+    if (remove_node(ol, n3, o1) != 0) return -1;
     destroy_orderlist(ol);
     return 0;
 }
 
-/* Remove from the front (oldest insertion) and check links repair. */
+/* Remove from the tail end (newest insertion = o3) and check links repair. */
 static int test_remove_front() {
     OrderList *ol = init_orderlist();
     if (!ol) return -1;
@@ -113,20 +115,20 @@ static int test_remove_front() {
     OrderNode *n2 = n1->next;
     OrderNode *n3 = n2->next;
 
-    if (remove_node(ol, n1, o1) != 0) return -1;
+    if (remove_node(ol, n1, o3) != 0) return -1;
 
     if (ol->size != 2) return -1;
-    Order *expected[] = {o2, o3};
+    Order *expected[] = {o2, o1};
     if (check_forward(ol,  expected, 2) != 0) return -1;
     if (check_backward(ol, expected, 2) != 0) return -1;
 
     if (remove_node(ol, n2, o2) != 0) return -1;
-    if (remove_node(ol, n3, o3) != 0) return -1;
+    if (remove_node(ol, n3, o1) != 0) return -1;
     destroy_orderlist(ol);
     return 0;
 }
 
-/* Remove from the back (most recent insertion) and check links repair. */
+/* Remove from the head end (oldest insertion = o1) and check links repair. */
 static int test_remove_back() {
     OrderList *ol = init_orderlist();
     if (!ol) return -1;
@@ -144,14 +146,14 @@ static int test_remove_back() {
     OrderNode *n2 = n1->next;
     OrderNode *n3 = n2->next;
 
-    if (remove_node(ol, n3, o3) != 0) return -1;
+    if (remove_node(ol, n3, o1) != 0) return -1;
 
     if (ol->size != 2) return -1;
-    Order *expected[] = {o1, o2};
+    Order *expected[] = {o3, o2};
     if (check_forward(ol,  expected, 2) != 0) return -1;
     if (check_backward(ol, expected, 2) != 0) return -1;
 
-    if (remove_node(ol, n1, o1) != 0) return -1;
+    if (remove_node(ol, n1, o3) != 0) return -1;
     if (remove_node(ol, n2, o2) != 0) return -1;
     destroy_orderlist(ol);
     return 0;
@@ -178,12 +180,12 @@ static int test_remove_middle() {
     if (remove_node(ol, n2, o2) != 0) return -1;
 
     if (ol->size != 2) return -1;
-    Order *expected[] = {o1, o3};
+    Order *expected[] = {o3, o1};
     if (check_forward(ol,  expected, 2) != 0) return -1;
     if (check_backward(ol, expected, 2) != 0) return -1;
 
-    if (remove_node(ol, n1, o1) != 0) return -1;
-    if (remove_node(ol, n3, o3) != 0) return -1;
+    if (remove_node(ol, n1, o3) != 0) return -1;
+    if (remove_node(ol, n3, o1) != 0) return -1;
     destroy_orderlist(ol);
     return 0;
 }
