@@ -52,7 +52,7 @@ typedef struct {
     size_t size;
 } OrderList;
 
-Order* create_order(
+Order* init_order(
     long id, 
     char* user_name, 
     int price, 

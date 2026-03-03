@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-Order* create_order(
+Order* init_order(
     long id, 
     char* user_name, 
     int price, 
@@ -119,8 +119,7 @@ int remove_order(OrderList *order_list, OrderNode *order_node) {
 }
 
 /*
-    frees the order_node. Not responsible for freeing the internal Order struct.
-    If order exists, will return error (-1)
+    frees an order from memory (OrderNode and its Order)
 
     E.g. order of ops:
     1. cancel order called -> pop ordernode from orderid hashmap 
@@ -138,19 +137,23 @@ int destroy_ordernode(OrderNode *order_node) {
         return -1;
     }
 
+    destroy_order(order_node->order);
+
     free(order_node);
+    // TODO: set hashmap values to NULL or remove from the map
+
     return 0;
 }
 
 
+/*
+    Frees only the list container (head sentinel, tail sentinel, OrderList).
+    Does not free OrderNodes in the list; caller is responsible for those
+    (e.g. via global order-id hashmap). Safe to call with size > 0.
+*/
 void destroy_orderlist(OrderList* order_list) {
     if (!order_list) return;
-    if (order_list->size > 0) {
-        printf("err: tried to remove order_list with %zu active order(s)\n", order_list->size);
-        return;
-    }
 
-    // free the default pointers
     free(order_list->head);
     free(order_list->tail);
     free(order_list);
