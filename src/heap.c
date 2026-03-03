@@ -1,6 +1,5 @@
 #include "../lib/heap.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
 Heap* init_heap(int capacity, HeapType type) {
@@ -84,6 +83,7 @@ int heapify_down(Heap* h) {
 */
 static int resize_heap(Heap* h) {
     if (!h) return -1;
+    if (h->capacity == 0) h->capacity = 1;
 
     OrderList** tmp = (OrderList**) realloc(h->data, sizeof(OrderList*)*h->capacity*2);
     if (!tmp) return -1;
@@ -113,4 +113,30 @@ OrderList* peek(Heap* h) {
     if (!h) return NULL;
     if (h->size == 0) return NULL;
     return h->data[0];
+}
+
+OrderList* pop(Heap* h) {
+    if (!h) return NULL;
+    if (h->size == 0) return NULL;
+
+    OrderList* popped_node = h->data[0];
+    h->data[0] = h->data[h->size-1];
+    h->data[h->size-1] = popped_node;
+    h->size--; 
+    if (heapify_down(h) == -1) return NULL;
+
+    return popped_node;
+
+}
+
+int destroy_heap(Heap* h) {
+    if (!h) return -1;
+    if (!h->data) return -1;
+
+    for (int i = 0; i < h->size; i++)
+        destroy_orderlist(h->data[i]);
+    free(h->data);
+    h->data = NULL;
+    free(h);
+    return 0;
 }

@@ -9,7 +9,7 @@ typedef enum {
 } HeapType;
 
 typedef struct {
-    OrderList** data; // array of OrderList* - each is a price level (price prio) with its time-priority queue
+OrderList** data; // array of OrderList* - each is a price level (price prio) with its time-priority queue
     int capacity;
     int size;
     HeapType type;
@@ -31,12 +31,11 @@ int push(Heap* h, OrderList* order_list);
 OrderList* pop(Heap* h);
 
 /*
-    Destroy order lists first, then free the data array, then self
+    Destroys each OrderList (container only; OrderNodes remain in caller's hashmap),
+    then frees the data array and the heap. Caller is responsible for freeing
+    OrderNodes via the global order-id hashmap.
 
-    Throws error if:
-    - there is at least one active order (at least one OrderList has size > 0)
-    - h is NULL
-    - h->data is NULL
+    Returns -1 if h is NULL or h->data is NULL.
 */
 int destroy_heap(Heap* h);
 
