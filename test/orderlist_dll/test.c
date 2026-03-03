@@ -67,9 +67,9 @@ static int test_add_three() {
     OrderList *ol = init_orderlist();
     if (!ol) return -1;
 
-    Order *o1 = create_order(1, strdup("alice"), 100, 10, BUY,  0);
-    Order *o2 = create_order(2, strdup("bob"),   200, 20, SELL, 1);
-    Order *o3 = create_order(3, strdup("carol"), 300, 30, BUY,  2);
+    Order *o1 = init_order(1, strdup("alice"), 100, 10, BUY,  0);
+    Order *o2 = init_order(2, strdup("bob"),   200, 20, SELL, 1);
+    Order *o3 = init_order(3, strdup("carol"), 300, 30, BUY,  2);
     if (!o1 || !o2 || !o3) return -1;
 
     if (add_order(ol, o1) != 0) return -1;
@@ -102,9 +102,9 @@ static int test_remove_front() {
     OrderList *ol = init_orderlist();
     if (!ol) return -1;
 
-    Order *o1 = create_order(1, strdup("alice"), 100, 10, BUY,  0);
-    Order *o2 = create_order(2, strdup("bob"),   200, 20, SELL, 1);
-    Order *o3 = create_order(3, strdup("carol"), 300, 30, BUY,  2);
+    Order *o1 = init_order(1, strdup("alice"), 100, 10, BUY,  0);
+    Order *o2 = init_order(2, strdup("bob"),   200, 20, SELL, 1);
+    Order *o3 = init_order(3, strdup("carol"), 300, 30, BUY,  2);
     if (!o1 || !o2 || !o3) return -1;
 
     add_order(ol, o1);
@@ -133,9 +133,9 @@ static int test_remove_back() {
     OrderList *ol = init_orderlist();
     if (!ol) return -1;
 
-    Order *o1 = create_order(1, strdup("alice"), 100, 10, BUY,  0);
-    Order *o2 = create_order(2, strdup("bob"),   200, 20, SELL, 1);
-    Order *o3 = create_order(3, strdup("carol"), 300, 30, BUY,  2);
+    Order *o1 = init_order(1, strdup("alice"), 100, 10, BUY,  0);
+    Order *o2 = init_order(2, strdup("bob"),   200, 20, SELL, 1);
+    Order *o3 = init_order(3, strdup("carol"), 300, 30, BUY,  2);
     if (!o1 || !o2 || !o3) return -1;
 
     add_order(ol, o1);
@@ -164,9 +164,9 @@ static int test_remove_middle() {
     OrderList *ol = init_orderlist();
     if (!ol) return -1;
 
-    Order *o1 = create_order(1, strdup("alice"), 100, 10, BUY,  0);
-    Order *o2 = create_order(2, strdup("bob"),   200, 20, SELL, 1);
-    Order *o3 = create_order(3, strdup("carol"), 300, 30, BUY,  2);
+    Order *o1 = init_order(1, strdup("alice"), 100, 10, BUY,  0);
+    Order *o2 = init_order(2, strdup("bob"),   200, 20, SELL, 1);
+    Order *o3 = init_order(3, strdup("carol"), 300, 30, BUY,  2);
     if (!o1 || !o2 || !o3) return -1;
 
     add_order(ol, o1);
@@ -195,8 +195,8 @@ static int test_remove_all() {
     OrderList *ol = init_orderlist();
     if (!ol) return -1;
 
-    Order *o1 = create_order(1, strdup("alice"), 100, 10, BUY,  0);
-    Order *o2 = create_order(2, strdup("bob"),   200, 20, SELL, 1);
+    Order *o1 = init_order(1, strdup("alice"), 100, 10, BUY,  0);
+    Order *o2 = init_order(2, strdup("bob"),   200, 20, SELL, 1);
     if (!o1 || !o2) return -1;
 
     add_order(ol, o1);
@@ -224,16 +224,36 @@ static int test_remove_all() {
 
 /* ------------------------------------------------------------------ */
 
-#define RUN(fn) \
-    do { \
-        if ((fn)() != 0) { printf("FAIL: " #fn "\n"); return -1; } \
-    } while (0)
+typedef int (*orderlist_test_fn)();
+
+static int run_orderlist_test(int index, const char* name, orderlist_test_fn fn) {
+    printf("  [ORDERLIST TEST %d] %s ...\n", index, name);
+    int rc = fn();
+    if (rc == 0) {
+        printf("  [ORDERLIST TEST %d] %s PASSED\n\n", index, name);
+    } else {
+        printf("  [ORDERLIST TEST %d] %s FAILED (rc=%d)\n\n", index, name, rc);
+    }
+    return rc;
+}
 
 int main() {
-    RUN(test_add_three);
-    RUN(test_remove_front);
-    RUN(test_remove_back);
-    RUN(test_remove_middle);
-    RUN(test_remove_all);
+    int failed = 0;
+    int idx = 1;
+
+    printf("====== ORDERLIST DLL TESTS BEGIN ======\n");
+
+    failed |= run_orderlist_test(idx++, "test_add_three",   test_add_three) != 0;
+    failed |= run_orderlist_test(idx++, "test_remove_front",  test_remove_front) != 0;
+    failed |= run_orderlist_test(idx++, "test_remove_back",   test_remove_back) != 0;
+    failed |= run_orderlist_test(idx++, "test_remove_middle", test_remove_middle) != 0;
+    failed |= run_orderlist_test(idx++, "test_remove_all",    test_remove_all) != 0;
+
+    printf("======= ORDERLIST DLL TESTS END =======\n");
+    if (failed) {
+        printf("One or more ORDERLIST DLL tests FAILED.\n");
+        return -1;
+    }
+    printf("All ORDERLIST DLL tests PASSED.\n");
     return 0;
 }
